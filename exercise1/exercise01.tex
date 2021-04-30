@@ -1,0 +1,153 @@
+\newcommand{\NUMBER}{1}
+\newcommand{\EXERCISES}{3}
+\newcommand{\DEADLINE}{09.11.2020}
+\newcommand{\COURSE}{Statistical Machine Learning}
+\newcommand{\STUDENTA}{Philipp von Bachmann}
+\newcommand{\STUDENTB}{Laura Häge}
+\documentclass[a4paper]{scrartcl}
+\usepackage[utf8]{inputenc}
+\usepackage[english]{babel}
+\usepackage{bbm}
+\usepackage{amsmath, enumerate, amssymb, multirow, fancyhdr, color, graphicx, lastpage, listings, tikz, pdflscape, subfigure, float, polynom, hyperref, tabularx, forloop, geometry, listings, fancybox, tikz, forest, tabstackengine, cancel}
+\input kvmacros
+\geometry{a4paper,left=3cm, right=3cm, top=3cm, bottom=3cm}
+\pagestyle {fancy}
+\fancyhead[C]{\COURSE}
+\fancyhead[R]{\today}
+\fancyfoot[L]{}
+\fancyfoot[C]{}
+\fancyfoot[R]{Page \thepage /\pageref*{LastPage}}
+\def\header#1#2{
+  \begin{center}
+    {\Large Assignment #1}\\
+    %{(Due by: #2)}
+  \end{center}
+}
+
+\newcounter{punktelistectr}
+\newcounter{punkte}
+\newcommand{\punkteliste}[2]{%
+  \setcounter{punkte}{#2}%
+  \addtocounter{punkte}{-#1}%
+  \stepcounter{punkte}%<-- also punkte = m-n+1 = Anzahl Spalten[1]
+  \begin{center}%
+  \begin{tabularx}{\linewidth}[]{@{}*{\thepunkte}{>{\centering\arraybackslash} X|}@{}>{\centering\arraybackslash}X}
+      \forloop{punktelistectr}{#1}{\value{punktelistectr} < #2 } %
+      {%
+        \thepunktelistectr &
+      }
+      #2 &  $\Sigma$ \\
+      \hline
+      \forloop{punktelistectr}{#1}{\value{punktelistectr} < #2 } %
+      {%
+        &
+      } &\\
+      \forloop{punktelistectr}{#1}{\value{punktelistectr} < #2 } %
+      {%
+        &
+      } &\\
+    \end{tabularx}
+  \end{center}
+}
+\begin{document}
+
+\begin{tabularx}{\linewidth}{m{0.3 \linewidth}X}
+  \begin{minipage}{\linewidth}
+    \STUDENTA\\
+    \STUDENTB
+  \end{minipage} & \begin{minipage}{\linewidth}
+    \punkteliste{1}{\EXERCISES}
+  \end{minipage}\\
+\end{tabularx}
+\header{Nr. \NUMBER}{\DEADLINE}
+
+\section{Bayes Optimal Function}
+
+  \begin{align*}
+      & \frac{\partial }{\partial c(x)} \int_y (log(c(x)) + \frac{y}{c(x)}) p(y\vert x) dy \\
+      &=  \int_y (\frac{\partial }{\partial c(x)} log(c(x)) + \frac{\partial }{\partial c(x)} \frac{y}{c(x)}) p(y\vert x) dy \\
+      &=  \int_y (\frac{1}{c(x)} + y \cdot (-\frac{1}{c(x)^2})) p(y\vert x) dy \\
+      &=  \frac{1}{c(x)} \int_y ( 1 - y \cdot \frac{1}{c(x)}) p(y\vert x) dy \\
+      &=  \frac{1}{c(x)} (\int_y p(y\vert x) dy - \int_y  y \cdot \frac{1}{c(x)} p(y\vert x) dy) \\
+      &=  \frac{1}{c(x)} (1- \frac{1}{c(x)} \cdot \int_y  y \cdot p(y\vert x) dy) \\
+  \end{align*}
+
+  Now set to 0:
+
+  \begin{align*}
+    &0 =  \frac{1}{c(x)} (1- \frac{1}{c(x)} \cdot \int_y  y \cdot p(y\vert x) dy) \\
+    & \text{because } \frac{1}{c(x)} > 0,  x \in \mathbb{R}:\\
+    \Rightarrow &0 =  (1- \frac{1}{c(x)} \cdot \int_y  y \cdot p(y\vert x) dy) \\
+    &1 = \frac{1}{c(x)} \cdot \int_y  y \cdot p(y\vert x) dy) \\
+    &c(x) =  \cdot \int_y  y \cdot p(y\vert x) dy) = E[Y \vert X] \\
+  \end{align*}
+
+
+\section{Bayes Optimal Function}
+
+  \subsection*{(a)}
+    \begin{align*}
+      E[L(yf(x)) \vert X]
+      &= \sum_y L(yf(x)) p(y\vert X) \\
+      &=  L(f(x)) p(y=1\vert X) + L(-f(x)) p(y=-1\vert X) \\
+      &> (1-k f(x)) p(y=1\vert X) + (1-k f(x)) p(y=-1\vert X) \\
+    \end{align*}
+
+    \begin{align*}
+      E[L(yf(x)) \vert X]
+      &= \sum_y L(yf(x)) p(y\vert X) \\
+      &=  L(f(x)) p(y=1\vert X) + L(-f(x)) p(y=-1\vert X) \\
+      &< (1-f(x)) p(y=1\vert X) + (1-f(x)) p(y=-1\vert X) \\
+      &0 = - p(y=1\vert X) - p(y=-1\vert X) \\
+    \end{align*}
+
+    \begin{align*}
+      \frac{\partial}{\partial f(x)} (1-f(x)) = -1
+      \frac{\partial}{\partial f(x)} (1-kf(x)) = -k
+    \end{align*}
+
+
+
+
+  \subsubsection*{(b)}
+    Because left and right side derivative at x=0 is not the same:
+    left side: -k, right side: -1
+
+\section{Bayes error}
+  \subsection*{(a)}
+    \begin{align*}
+      R^* & = min(E[\mathbbm{1}_{f(x) y\leq 0} \vert X])\\
+      & = min(E_X [\mathbbm{1}_{f(x)=-1} P(Y=1 \vert X)+ \mathbbm{1}_{f(x)=1} P(Y=-1 \vert X)])\\
+      & = min(\mathbbm{1}_{f(x)=-1} (\int_0^\frac{1}{8}P(Y=1, x) dx + \int_\frac{1}{8}^\frac{7}{8} P(Y=1, x) dx + \int_\frac{7}{8}^1 P(Y=1, x) dx)\\
+      & + \mathbbm{1}_{f(x)=1} (\int_0^\frac{1}{8}P(Y=-1, x) dx + \int_\frac{1}{8}^\frac{7}{8} P(Y=-1, x) dx + \int_\frac{7}{8}^1 P(Y=-1, x) dx)\\
+      & = min(\mathbbm{1}_{f(x)=-1} (\frac{1}{8}0.1 + \frac{6}{8} 0.9 + \frac{1}{8} 0.1)\\
+      & + \mathbbm{1}_{f(x)=-1} (\frac{1}{8}0.9 + \frac{6}{8} 0.1 + \frac{1}{8} 0.9))\\
+      & = min(\mathbbm{1}_{f(x)=-1} \cdot 0.7 + \mathbbm{1}_{f(x)=1} \cdot 0.3)\\
+      & \Rightarrow f(x) = 1
+    \end{align*}
+
+    \begin{align*}
+      R^* &= min(E_X[\mathbbm{1}_{f(x)= 1} P(Y=-1, X) + \mathbbm{1}_{f(x)= -1} P(Y=1, X)]\\
+      & = min(\int_x [\mathbbm{1}_{f(x)= 1} P(Y=-1, X) + \mathbbm{1}_{f(x)= -1} P(Y=1, X)])\\
+      & = min(\int_{x \in [0, \frac{1}{8}]}[\mathbbm{1}_{f(x)= 1} P(Y=-1, X) + \mathbbm{1}_{f(x)= -1} P(Y=1, X)]\\
+      & + \int_{x \in [\frac{1}{8}, \frac{7}{8}]}[\mathbbm{1}_{f(x)= 1} P(Y=-1, X) + \mathbbm{1}_{f(x)= -1} P(Y=1, X)]\\
+      & + \int_{x \in [\frac{7}{8}, 1]}[\mathbbm{1}_{f(x)= 1} P(Y=-1, X) + \mathbbm{1}_{f(x)= -1} P(Y=1, X)])\\
+    \end{align*}
+
+    all three terms can be minimized on their own
+
+
+  \subsection*{(b)}
+    Probably w = 1, b = 0.1 or multiples of it.
+
+
+
+
+
+
+
+
+
+
+
+\end{document}

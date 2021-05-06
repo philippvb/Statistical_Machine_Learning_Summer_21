@@ -79,52 +79,52 @@
     & \text{because } \frac{1}{c(x)} > 0,  x \in \mathbb{R}:\\
     \Rightarrow &0 =  (1- \frac{1}{c(x)} \cdot \int_y  y \cdot p(y\vert x) dy) \\
     &1 = \frac{1}{c(x)} \cdot \int_y  y \cdot p(y\vert x) dy) \\
-    &c(x) =  \cdot \int_y  y \cdot p(y\vert x) dy) = E[Y \vert X] \\
+    &c(x) =  \int_y  y \cdot p(y\vert x) dy) = E[Y \vert X] \\
   \end{align*}
 
 
 \section{Bayes Optimal Function}
 
+
   \subsection*{(a)}
-    \begin{align*}
-      E[L(yf(x)) \vert X]
-      &= \sum_y L(yf(x)) p(y\vert X) \\
-      &=  L(f(x)) p(y=1\vert X) + L(-f(x)) p(y=-1\vert X) \\
-      &> (1-k f(x)) p(y=1\vert X) + (1-k f(x)) p(y=-1\vert X) \\
-    \end{align*}
+  \begin{align*}
+    E[L(Y)|X]
+    &= max(0, 1-f(x)) P(Y=-1|X) + (1 + kf(x)) P(Y=-1|X) \\&+ max(0, 1-f(x)) P(Y=1|X) + (1 + kf(x)) P(Y=1|X)\\
+    &= (max(0, 1-f(x)) + (1 + kf(x))) \cdot (P(Y=-1|X) + P(Y=1|X))\\
+    &= (max(0, 1-f(x)) + (1 + kf(x))) \cdot 1\\
+  \end{align*}
+  We see that this expression gets maximized for $f(x) = 0$, as $k\geq 1$.
 
-    \begin{align*}
-      E[L(yf(x)) \vert X]
-      &= \sum_y L(yf(x)) p(y\vert X) \\
-      &=  L(f(x)) p(y=1\vert X) + L(-f(x)) p(y=-1\vert X) \\
-      &< (1-f(x)) p(y=1\vert X) + (1-f(x)) p(y=-1\vert X) \\
-      &0 = - p(y=1\vert X) - p(y=-1\vert X) \\
-    \end{align*}
 
-    \begin{align*}
-      \frac{\partial}{\partial f(x)} (1-f(x)) = -1
-      \frac{\partial}{\partial f(x)} (1-kf(x)) = -k
-    \end{align*}
+  % \begin{align*}
+  %   E[L(Y)|X]
+  %   &= max(0, 1-f(x)) P(Y=-1|X)P(X=-1) + (1 + kf(x)) P(Y=-1|X) P(X=1)\\&+ max(0, 1-f(x)) P(Y=1|X) P(X=1)+ (1 + kf(x)) P(Y=1|X)P(X=-1)\\
+  %   &= max(0, 1-f(x)) (P(Y=-1|X)P(X=-1) + P(Y=1|X)P(X=1)) \\&+ (1 + kf(x)) (P(Y=-1|X)P(X=1) + P(Y=1|X)P(X=-1))\\
+  %   &= (max(0, 1-f(x)) + 1 - (1 + kf(x))) * (2 P(Y=1| X) P(X=1) - P(X=1) - P(Y=1| X) )\\
+  %   &= (max(0, 1-f(x)) + kf(x))) * (2 P(Y=1| X) P(X=1) - P(X=1) - P(Y=1| X) )\\
+  % \end{align*}
 
+  % P * P(x) + (1-p) * P(-x)
+  % = P * P(x) + (1-p) * (1-P(x))
+  % = P * P(x) + 1 - p - p(x) + P * P(x)
+  % = 2P * P(X) + 1 - P - P(x)
+
+  % P * P(-x) + (1-p) * P(x)
+  % = P (1-P(X)) + (1-p) * P(x)
+  % = P - P * P(X) + P(X) - P * P(x)
+  % = -2P P(X) + P + P(X)
 
 
 
   \subsubsection*{(b)}
-    Because left and right side derivative at x=0 is not the same:
-    left side: -k, right side: -1
+  As we have seen in (a), the best function always predicts 0. As 0 is
+  undefined, if we define it one class or another, it will always predict that
+  class and is therefore not classification calibrated. Another way to see this
+  is that the derivative at 0 doesn't exits, as the right side derivative is 1
+  where the left side derivative is k and k>1.
 
 \section{Bayes error}
   \subsection*{(a)}
-    \begin{align*}
-      R^* & = min(E[\mathbbm{1}_{f(x) y\leq 0} \vert X])\\
-      & = min(E_X [\mathbbm{1}_{f(x)=-1} P(Y=1 \vert X)+ \mathbbm{1}_{f(x)=1} P(Y=-1 \vert X)])\\
-      & = min(\mathbbm{1}_{f(x)=-1} (\int_0^\frac{1}{8}P(Y=1, x) dx + \int_\frac{1}{8}^\frac{7}{8} P(Y=1, x) dx + \int_\frac{7}{8}^1 P(Y=1, x) dx)\\
-      & + \mathbbm{1}_{f(x)=1} (\int_0^\frac{1}{8}P(Y=-1, x) dx + \int_\frac{1}{8}^\frac{7}{8} P(Y=-1, x) dx + \int_\frac{7}{8}^1 P(Y=-1, x) dx)\\
-      & = min(\mathbbm{1}_{f(x)=-1} (\frac{1}{8}0.1 + \frac{6}{8} 0.9 + \frac{1}{8} 0.1)\\
-      & + \mathbbm{1}_{f(x)=-1} (\frac{1}{8}0.9 + \frac{6}{8} 0.1 + \frac{1}{8} 0.9))\\
-      & = min(\mathbbm{1}_{f(x)=-1} \cdot 0.7 + \mathbbm{1}_{f(x)=1} \cdot 0.3)\\
-      & \Rightarrow f(x) = 1
-    \end{align*}
 
     \begin{align*}
       R^* &= min(E_X[\mathbbm{1}_{f(x)= 1} P(Y=-1, X) + \mathbbm{1}_{f(x)= -1} P(Y=1, X)]\\
@@ -134,11 +134,23 @@
       & + \int_{x \in [\frac{7}{8}, 1]}[\mathbbm{1}_{f(x)= 1} P(Y=-1, X) + \mathbbm{1}_{f(x)= -1} P(Y=1, X)])\\
     \end{align*}
 
-    all three terms can be minimized on their own
+    
+    all three terms can be minimized on their own, and we get the optimal classifier as:
+$$f(x) = \begin{cases}
+      -1 \text{ if }  0 \leq x \leq \frac{1}{8}\\
+      1 \text{ if }  \frac{1}{8} < x \leq \frac{7}{8}\\
+      -1 \text{ if }  \frac{7}{8} < x \leq 1\\
+    \end{cases}$$
+    This results in the error:
+    $R^* =  \frac{1}{8} \cdot 0.1 + \frac{6}{8} \cdot 0.1 + \frac{1}{8} \cdot 0.1 = 0.1$
 
 
   \subsection*{(b)}
-    Probably w = 1, b = 0.1 or multiples of it.
+    If we set $b = -\frac{1}{8}$, we see that we get the best (meaning same as
+    in (a)) predictions for $X \in [0, \frac{7}{8}]$. As we can only linearly
+    seperate the space $X$ with the given classifier, we can not improve the class
+    separation and the Loss upon that. As we have 0-1 Loss, we can now choose $w \in
+    \mathbb{R}_{\ge 0}$ arbitrary.
 
 
 

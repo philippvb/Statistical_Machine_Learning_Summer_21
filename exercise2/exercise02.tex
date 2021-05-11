@@ -1,0 +1,186 @@
+\newcommand{\NUMBER}{2}
+\newcommand{\EXERCISES}{2}
+\newcommand{\COURSE}{Statistical Machine Learning}
+\newcommand{\STUDENTA}{Philipp von Bachmann}
+\newcommand{\STUDENTB}{Laura Häge}
+\documentclass[a4paper]{scrartcl}
+\usepackage[utf8]{inputenc}
+\usepackage[english]{babel}
+\usepackage{bbm}
+\usepackage{amsmath, enumerate, amssymb, multirow, fancyhdr, color, graphicx, lastpage, listings, tikz, pdflscape, subfigure, float, polynom, hyperref, tabularx, forloop, geometry, listings, fancybox, tikz, forest, tabstackengine, cancel}
+\input kvmacros
+\geometry{a4paper,left=3cm, right=3cm, top=3cm, bottom=3cm}
+\pagestyle {fancy}
+\fancyhead[C]{\COURSE}
+\fancyhead[R]{\today}
+\fancyfoot[L]{}
+\fancyfoot[C]{}
+\fancyfoot[R]{Page \thepage /\pageref*{LastPage}}
+\def\header#1#2{
+  \begin{center}
+    {\Large Assignment #1}\\
+  \end{center}
+}
+
+\newcounter{punktelistectr}
+\newcounter{punkte}
+\newcommand{\punkteliste}[2]{%
+  \setcounter{punkte}{#2}%
+  \addtocounter{punkte}{-#1}%
+  \stepcounter{punkte}%<-- also punkte = m-n+1 = Anzahl Spalten[1]
+  \begin{center}%
+  \begin{tabularx}{\linewidth}[]{@{}*{\thepunkte}{>{\centering\arraybackslash} X|}@{}>{\centering\arraybackslash}X}
+      \forloop{punktelistectr}{#1}{\value{punktelistectr} < #2 } %
+      {%
+        \thepunktelistectr &
+      }
+      #2 &  $\Sigma$ \\
+      \hline
+      \forloop{punktelistectr}{#1}{\value{punktelistectr} < #2 } %
+      {%
+        &
+      } &\\
+      \forloop{punktelistectr}{#1}{\value{punktelistectr} < #2 } %
+      {%
+        &
+      } &\\
+    \end{tabularx}
+  \end{center}
+}
+\begin{document}
+
+\begin{tabularx}{\linewidth}{m{0.3 \linewidth}X}
+  \begin{minipage}{\linewidth}
+    \STUDENTA\\
+    \STUDENTB
+  \end{minipage} & \begin{minipage}{\linewidth}
+    \punkteliste{1}{\EXERCISES}
+  \end{minipage}\\
+\end{tabularx}
+\header{Nr. \NUMBER}{\DEADLINE}
+
+\section{Maximum Likelihood and Maximum A Posteriori Estimation}
+  \subsection*{(a)}
+    \begin{align*}
+      w_{ML} 
+      &= argmax_w p(y \vert x, w)\\
+      &= argmax_w log(\frac{1}{\sqrt{2 \pi g(x)}} exp(-\frac{(y-\langle w, x \rangle )^2}{2g(x)}))\\
+      &= argmax_w log(exp(-\frac{(y-\langle w, x \rangle )^2}{2g(x)}))\\
+      &= argmax_w log(exp(-(y-\langle w, x \rangle )^2))\\
+      &= argmax_w -(y-\langle w, x \rangle )^2\\
+      &= argmin_w (y-\langle w, x \rangle )^2\\
+    \end{align*}
+
+    \begin{align*}
+      \nabla_w (y-\langle w, x \rangle )^2
+      &= -2yx + 2 \langle w, x \rangle  x
+    \end{align*}
+
+    \begin{align*}
+      0 & = -2yx + 2 \langle w, x \rangle  x\\
+      2yx & = 2 \langle w, x \rangle  x\\
+      y x& = \langle w, x \rangle  x\\
+      y& = \langle w, x \rangle\\
+      w& = y x^{-1} %\frac{y}{x}\\
+    \end{align*}
+    TODO: show that this is minimum
+
+  \subsection*{(b)}
+    \begin{align*}
+      p(x, y \vert w)
+      &= \frac{p(x,y,w)}{p(w)}\\
+      &= \frac{p(y\vert x, w) p(x \vert w) p (w) }{p(w)}\\
+      &= p(y\vert x, w) p(x \vert w)\\
+      &= p(y\vert x, w) p(x)\\
+    \end{align*}
+
+    \begin{align*}
+      w_{MAP}
+      &= argmax_w \sum_i log(p(y_i \vert x_i, w)) + log(p(w))\\
+      &= argmax_w \sum_i log(\frac{1}{\sqrt{2 \pi g(x_i)}} exp(-\frac{(y_i-\langle w, x_i \rangle )^2}{2g(x_i)})) + log(\frac{1}{(2\pi)^\frac{d}{2} (\prod_j \lambda_j)^\frac{1}{2}} exp(- \langle w, \Lambda^{-1}w \rangle))\\
+      &= argmax_w \sum_i log(exp(-(y_i-\langle w, x_i \rangle )^2)) + log(exp(- \langle w, \Lambda^{-1}w \rangle)\\
+      &= argmax_w - \sum_i(y_i-\langle w, x_i \rangle )^2) - \langle w, \Lambda^{-1}w \rangle\\
+      &= argmax_w - \sum_i y_i^2 -2y_i \langle w, x_i \rangle + \langle w, x_i \rangle^2 - \langle w, \Lambda^{-1}w \rangle\\
+      &= argmin_w  \sum_i y_i^2 -2y_i \langle w, x_i \rangle + \langle w, x_i \rangle^2 + \langle w, \Lambda^{-1}w \rangle\\
+    \end{align*}
+
+    \begin{align*}
+      & \nabla_w \sum_i y_i^2 -2y_i \langle w, x_i \rangle + \langle w, x_i \rangle^2 + \langle w, \Lambda^{-1}w \rangle\\
+      &= \sum_i -2y_i x_i + 2 \langle w,  x_i \rangle x_i + 2 w \Lambda^{-1}
+    \end{align*}
+
+    % \begin{align*}
+    %   0 &= \sum_i -y_{ij} x_{ij} +  w_j, x_{ij}  x_{ij} -  w_j \Lambda_j^{-1}\\
+    %   \sum_i y_{ij} x_{ij} &=  \sum_i  w_j, x_{ij}  x_{ij} -  w_j \Lambda_j^{-1}\\
+    %   \sum_i y_{ij} x_{ij} &=  w_j (\sum_i  x_{ij}  x_{ij} -  \Lambda_j^{-1})\\
+    %   w_j &= \frac{\sum_i y_{ij} x_{ij}}{(\sum_i  x_{ij}  x_{ij} -  \Lambda_j^{-1})}
+    % \end{align*}
+
+    \begin{align*}
+      0 &= \sum_i -2y_i x_i + 2 \langle w,  x_i \rangle x_i + 2 w \Lambda^{-1}\\
+      0 &= \sum_i -y_i x_i + \langle w,  x_i \rangle x_i + w \Lambda^{-1}\\
+      \sum_i y_i x_i &= \sum_i  \langle w,  x_i \rangle x_i + \langle w,  \Lambda^{-1} \rangle\\
+      \sum_i y_i x_i &= \sum_i  \langle w,  x_i +  \Lambda^{-1} \rangle
+    \end{align*}
+
+    TODO: finish
+
+
+
+\section*{ML and MAP estimators}
+  \subsection*{(a)}
+    Formulate the problem and simplify:
+    \begin{align*}
+      \theta_{ML} 
+      &= argmax_\theta log(p(a_1, \dots , a_n, b_1, \dots , b_n \vert \theta))\\
+      &= argmax_\theta \sum_i log(p(a_i \vert \theta))) + \sum_i log(p(b_i \vert \theta )))\\
+      &= argmax_\theta \sum_i log(\frac{1}{\sqrt{2\pi \sigma_1^2}} exp(-\frac{(a_i - \theta )^2}{2\sigma_1^2})) + \sum_i log(\frac{1}{\sqrt{2\pi \sigma_2^2}} exp(-\frac{(b_i - \theta )^2}{2\sigma_2^2})) \\
+      &= argmax_\theta \sum_i -\frac{(a_i - \theta )^2}{2\sigma_1^2} + \sum_i-\frac{(b_i - \theta )^2}{2\sigma_2^2} \\
+    \end{align*}
+
+    Compute derivative:
+    \begin{align*}
+      & \frac{\partial \sum_i \frac{(a_i - \theta )^2}{2\sigma_1^2} + \sum_i \frac{(b_i - \theta )^2}{2\sigma_2^2}}{\partial \theta}\\
+      &= \frac{\partial \sum_i \frac{a_i^2 - 2a_i \theta - \theta^2}{2\sigma_1^2} + \sum_i \frac{b_i^2 -2b_i \theta + \theta^2}{2\sigma_2^2}}{\partial \theta}\\
+      &= \sum_i \frac{-2a_i + 2\theta}{2\sigma_1^2} + \sum_i \frac{-2b_i  + 2\theta}{2\sigma_2^2}\\
+      &= \sum_i \frac{-a_i + \theta}{\sigma_1^2} + \sum_i \frac{-b_i  + \theta}{2\sigma_2^2}\\
+      &= \frac{n \theta }{\sigma_1^2} + \sum_i - \frac{a_i}{\sigma_1^2} + \frac{n \theta }{\sigma_2^2} + \sum_i - \frac{a_i}{\sigma_2^2}
+    \end{align*}
+
+    Set to 0:
+    \begin{align*}
+      0 &= \frac{n \theta }{\sigma_1^2} + \sum_i - \frac{a_i}{\sigma_1^2} + \frac{n \theta }{\sigma_2^2} + \sum_i - \frac{b_i}{\sigma_2^2}\\
+      0 &= n\theta \sigma_2^2 + \sum_i - \sigma_2^2 a_i + n\theta \sigma_1^2 + \sum_i - \sigma_1^2 b_i\\
+      \sum_i \sigma_2^2 a_i + \sum_i \sigma_1^2 b_i &= n\theta \sigma_2^2  + n\theta \sigma_1^2\\
+      \sum_i \sigma_2^2 a_i + \sum_i \sigma_1^2 b_i &= (\sigma_2^2 + \sigma_1^2) n\theta\\
+      \theta &= \frac{\sum_i \sigma_2^2 a_i + \sum_i \sigma_1^2 b_i}{n(\sigma_2^2 + \sigma_1^2)} \\
+    \end{align*}
+
+  \subsection*{(b)}
+    \begin{align*}
+      \theta_{MAP}
+      &= argmax_\theta log(p(a_1, \dots , a_n, b_1, \dots , b_n \vert \theta)) + log(p(\theta))\\
+      &= argmax_\theta \sum_i log(p(a_i \vert \theta))) + \sum_i log(p(b_i \vert \theta )))+ log(p(\theta))\\
+      &= argmax_\theta \sum_i log(\frac{1}{\sqrt{2\pi \sigma_1^2}} exp(-\frac{(a_i - \theta )^2}{2\sigma_1^2})) + \sum_i log(\frac{1}{\sqrt{2\pi \sigma_2^2}} exp(-\frac{(b_i - \theta )^2}{2\sigma_2^2})) \\
+      &+ log(\frac{1}{\sqrt{2 \pi \sigma_P^2}}exp(-\frac{(\mu_P - \theta)^2}{2\sigma_P^2})) \\
+      &= argmax_\theta \sum_i -\frac{(a_i - \theta )^2}{2\sigma_1^2} + \sum_i-\frac{(b_i - \theta )^2}{2\sigma_2^2} - \frac{(\mu_P - \theta)^2}{2\sigma_P^2}\\ 
+    \end{align*}
+
+    \begin{align*}
+      & \frac{\partial}{\partial \theta} \sum_i \frac{(a_i - \theta )^2}{2\sigma_1^2} + \sum_i \frac{(b_i - \theta )^2}{2\sigma_2^2}- \frac{(\mu_P - \theta)^2}{2\sigma_P^2}\\
+      & \frac{\partial}{\partial \theta} \sum_i \frac{a_i^2 - 2a_i \theta - \theta^2}{2\sigma_1^2} + \sum_i \frac{b_i^2 -2b_i \theta + \theta^2}{2\sigma_2^2}- \frac{\mu_P^2 - 2\mu_P \theta + \theta^2}{2\sigma_P^2}\\
+      &= \sum_i \frac{-2a_i + 2\theta}{2\sigma_1^2} + \sum_i \frac{-2b_i  + 2\theta}{2\sigma_2^2}- \frac{- 2\mu_P + 2\theta}{2\sigma_P^2}\\
+      &= \sum_i \frac{-a_i + \theta}{\sigma_1^2} + \sum_i \frac{-b_i  + \theta}{2\sigma_2^2} + \frac{\mu_P - \theta}{\sigma_P^2}\\
+      &= \frac{n \theta }{\sigma_1^2} + \sum_i - \frac{a_i}{\sigma_1^2} + \frac{n \theta }{\sigma_2^2} + \sum_i - \frac{a_i}{\sigma_2^2} + \frac{\mu_P}{\sigma_P^2} - \frac{\theta}{\sigma_P^2}\\
+    \end{align*}
+
+    \begin{align*}
+      0 &= \frac{n \theta }{\sigma_1^2} + \sum_i - \frac{b_i}{\sigma_1^2} + \frac{n \theta }{\sigma_2^2} + \sum_i - \frac{a_i}{\sigma_2^2} + \frac{\mu_P}{\sigma_P^2} - \frac{\theta}{\sigma_P^2}\\
+      \sum_i \sigma_2^2 a_i + \sum_i \sigma_1^2 b_i - \frac{\mu_P}{\sigma_P^2}&= (\sigma_2^2 + \sigma_1^2) n\theta - \frac{\theta}{\sigma_P^2}\\
+      \sum_i \sigma_2^2 a_i + \sum_i \sigma_1^2 b_i - \frac{\mu_P}{\sigma_P^2}&= ((\sigma_2^2 + \sigma_1^2) n - \frac{1}{\sigma_P^2}) \theta\\
+      \frac{\sum_i \sigma_2^2 a_i + \sum_i \sigma_1^2 b_i - \frac{\mu_P}{\sigma_P^2}}{((\sigma_2^2 + \sigma_1^2) n - \frac{1}{\sigma_P^2}) }&= \theta
+    \end{align*}
+
+
+
+\end{document}

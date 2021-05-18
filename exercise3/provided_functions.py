@@ -13,7 +13,7 @@ def cost_fn(w, x, y, lmbd):
 
     output: loss ||x * w - y||_1 + lmbd * ||w||_2^2
     '''
-    return np.abs(x @ w - y).sum() +\
+    return np.abs(x @ np.expand_dims(w, 1) - y).sum() +\
            lmbd * (w ** 2).sum()
 
 def L1LossRegression(X, Y, lmbd_reg=0.):
@@ -28,7 +28,7 @@ def L1LossRegression(X, Y, lmbd_reg=0.):
     '''
     w = minimize(cost_fn, np.zeros(X.shape[1]),
                  args=(X, Y, lmbd_reg)).x
-    return np.expand_dims(w, 1)
+    return w
 
 # ------------------ (a)
 def cost_fn_square(w, x, y, lmbd):
@@ -38,7 +38,7 @@ def cost_fn_square(w, x, y, lmbd):
 def RidgeRegression(X, Y, lmbd_reg=0.):
     w = minimize(cost_fn_square, np.zeros(X.shape[1]),
                 args=(X, Y, lmbd_reg)).x
-    return np.expand_dims(w, 1)
+    return w
 
 def LeastSquares(X, Y):
     return RidgeRegression(X, Y, 0.)
@@ -47,54 +47,87 @@ def LeastSquares(X, Y):
 # ------------------ (b)
 def Basis(X,k):
     basis_data = np.zeros((X.shape[0], 2*k+1))
-    basis_data[:, 0] = np.ones_like(X)
+    basis_data[:, 0] = np.ones(X.shape[0])
     for freq in range(1, 2*k+1, 2):
-        basis_data[:, freq] = np.cos(2 * np.pi * freq * X)
-        basis_data[:, freq+1] = np.sin(2 * np.pi * freq * X)
-
+        # basis_data[:, freq] = np.squeeze(np.cos(2 * np.pi * freq * X))
+        # basis_data[:, freq+1] = np.squeeze(np.sin(2 * np.pi * freq * X))
+        basis_data[:, freq] = np.squeeze(np.cos(freq * X))
+        basis_data[:, freq+1] = np.squeeze(np.sin(freq * X))
     return basis_data
 
 
 # ------------------ (c)
 data = np.load("exercise3/onedim_data.npy", allow_pickle=True).item()
-x_train = np.squeeze(data["Xtrain"])
-y_train = np.squeeze(data["Ytrain"])
-x_test = np.squeeze(data["Xtest"])
-y_test = np.squeeze(data["Ytest"])
+x_train = data["Xtrain"]
+y_train = data["Ytrain"]
+x_test = data["Xtest"]
+y_test = data["Ytest"]
 
-# # plt.show()
-# # because there are many outlies, we choose L1, since it penalized outliers less
-# plot_x = np.linspace(0, 1, 1000)
-# plt.scatter(x_train, y_train, color="grey")
 
-# k_list = [1,2,3,5,10,15,20]
-# # figs, axs = plt.subplots(len(k_list))
-# train_losses = []
-# test_losses = []
-# lambda_regularization = 0
-# for index, k in enumerate(k_list):
-#     x_train_mapped = Basis(x_train, k)
-#     w = L1LossRegression(x_train_mapped, y_train, lambda_regularization)
-#     train_losses.append(cost_fn(w, x_train_mapped, y_train, lambda_regularization)/x_train.shape[0])
-#     test_losses.append(cost_fn(w, Basis(x_test, k), y_test, lambda_regularization)/(x_test.shape[0]))
-#     plt.plot(plot_x, Basis(plot_x, k) @ w)
+
+
+# because there are many outlies, we choose L1, since it penalized outliers less
+plot_x = np.linspace(0, 1, 1000)
+plt.scatter(np.squeeze(x_train), np.squeeze(y_train), color="grey")
+
+k_list = [1,2,3,5,10,15,20]
+train_losses = []
+test_losses = []
+lambda_regularization = 30
+for index, k in enumerate(k_list):
+    x_train_mapped = Basis(x_train, k)
+    w = L1LossRegression(x_train_mapped, y_train, lambda_regularization)
+    train_losses.append(cost_fn(w, x_train_mapped, y_train, lambda_regularization)/x_train.shape[0])
+    test_losses.append(cost_fn(w, Basis(x_test, k), y_test, lambda_regularization)/(x_test.shape[0]))
+    plt.plot(plot_x, np.squeeze(Basis(plot_x, k) @ np.expand_dims(w, 1)))
 
 # plt.show()
-
-# plt.bar(k_list, train_losses)
-# plt.bar(k_list, test_losses)
+plt.plot(k_list, train_losses)
+plt.plot(k_list, test_losses)
 # plt.show()
 
 # -------------------- (d)
 
 def FourierBasisNormalized(X, k):
-    pass
+    basis_data = np.zeros((X.shape[0], 2*k+1))
+    basis_data[:, 0] = np.ones(X.shape[0])
+    for freq in range(1, 2*k+1, 2):
+        basis_data[:, freq] = np.squeeze(np.cos(freq * X))/omega("cos", freq)
+        basis_data[:, freq+1] = np.squeeze(np.sin(freq * X))/omega("sin", freq)
+    return basis_data
+
 
 
 
 def omega(f, freq):
-    return quad(lambda x: np.abs(np.cos(2 * np.pi * freq * x))**2, 0, 1)
+    if f == "sin":
+        outer_derivative = np.cos
+    else:
+        outer_derivative = np.sin
+    return quad(lambda x: np.square(outer_derivative(freq * x) * freq), 0, 1)[0]
 
 
-print(omega(np.sin, 1))
+
+plt.clf()
+
+plot_x = np.linspace(0, 1, 1000)
+plt.scatter(np.squeeze(x_train), np.squeeze(y_train), color="grey")
+
+k_list = [1,2,3,5,10,15,20]
+# figs, axs = plt.subplots(len(k_list))
+train_losses = []
+test_losses = []
+lambda_regularization = 0
+for index, k in enumerate(k_list):
+    x_train_mapped = FourierBasisNormalized(x_train, k)
+    w = L1LossRegression(x_train_mapped, y_train, lambda_regularization)
+    train_losses.append(cost_fn(w, x_train_mapped, y_train, lambda_regularization)/x_train.shape[0])
+    test_losses.append(cost_fn(w, FourierBasisNormalized(x_test, k), y_test, lambda_regularization)/(x_test.shape[0]))
+    plt.plot(plot_x, np.squeeze(FourierBasisNormalized(plot_x, k) @ np.expand_dims(w, 1)))
+
+plt.show()
+plt.plot(k_list, train_losses)
+plt.plot(k_list, test_losses)
+plt.show()
+
 

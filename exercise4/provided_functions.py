@@ -129,11 +129,12 @@ x_train /= np.std(x_train, axis=0)
 x_val -= np.mean(x_val, axis=0)
 x_val /= np.std(x_val, axis=0)
 
+
 # add one vector for offset
 x_train = np.hstack((np.ones((x_train.shape[0], 1)), x_train))
 x_val = np.hstack((np.ones((x_val.shape[0], 1)), x_val))
 
-lmbd = 3
+lmbd = 10
 
 w = Lasso(x_train, y_train, lmbd=lmbd)
 y_train_predict = x_train @ w
@@ -148,9 +149,7 @@ plt.scatter(y_train, y_train_predict)
 plt.plot(perfect_fit, perfect_fit, color="red")
 plt.show()
 
-# (3)
-def Prediction(X):
-    return np.sqrt(X @ w)
+    
 
 plt.scatter(y_train, Prediction(x_train))
 plt.plot(perfect_fit, perfect_fit, color="red")

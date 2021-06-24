@@ -1,0 +1,3 @@
+convert using notebook-as-pdf
+
+jupyter-nbconvert --to PDFviaHTML .\exercise7\exercise_7.ipynb

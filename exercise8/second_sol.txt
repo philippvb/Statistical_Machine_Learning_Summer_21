@@ -1,0 +1,18 @@
+def Permutation_Test(X, y, alpha=0.05, n_samples=1000):
+    # first set baseline
+    mask, loss = CrossValidation(X, y)
+    mask=mask[0]
+    w, x_pred = train(X[:, mask], y)
+    x_pred = np.sign(x_pred)
+    T = np.abs(np.sum(x_pred == y) - np.sum(x_pred != y))
+    t_pis = []
+    for i in range(n_samples):
+        random_permutation = np.random.permutation(y.shape[0])
+        y_perm = y[random_permutation]
+        T_pi = np.abs(np.sum(x_pred == y_perm) - np.sum(x_pred != y_perm))
+        t_pis.append(T_pi)
+    t_pis = np.array(t_pis)
+    p = np.sum(t_pis > T)/t_pis.shape[0]
+    print(p)
+    print(f"\nThe result of th permutation test is that X and Y are {'in' if p > alpha else ''}dependent.")
+    return p < alpha
